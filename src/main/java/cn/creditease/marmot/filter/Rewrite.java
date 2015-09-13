@@ -7,10 +7,7 @@
 
 package cn.creditease.marmot.filter;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +131,7 @@ public class Rewrite implements Filter {
     }
 
     /**
-     * 递归搜索路由，已处理循环依赖的问题
+     * 递归搜索路由
      * @param uri
      * @param context
      * @param routerPath
@@ -149,9 +146,11 @@ public class Rewrite implements Filter {
 
         URL routerFile = context.getResource(routerPath);
 
-        String path = routerFile.getPath();
+        String absolutePath = routerFile.getPath();
 
-        XMLEventReader reader = getReader(routerFile.getFile());
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+
+        XMLEventReader reader = factory.createXMLEventReader(context.getResourceAsStream(routerPath));
 
         XMLEvent event;
 
@@ -172,7 +171,7 @@ public class Rewrite implements Filter {
         }
 
         // 存储已加载的路由文件路径
-        paths.add(path);
+        paths.add(absolutePath);
 
         while(reader.hasNext()){
             event = reader.nextEvent();
@@ -181,7 +180,7 @@ public class Rewrite implements Filter {
                 name = start.getName().toString();
 
                 //检测是否为import元素并且未加载
-                if(name.equals("import") && paths.contains(path)){
+                if(name.equals("import") && paths.contains(absolutePath)){
                     attr = start.getAttributeByName(new QName("src"));
                     src = attr.getValue();
 
@@ -223,19 +222,6 @@ public class Rewrite implements Filter {
 
         target = target.substring(0, target.lastIndexOf("."));
         context.setAttribute("mockFile", target);
-    }
-
-    /**
-     * 获取XML Reader
-     * @param string
-     * @return
-     * @throws FileNotFoundException
-     * @throws XMLStreamException
-     */
-    private XMLEventReader getReader(String string) throws FileNotFoundException, XMLStreamException{
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLEventReader reader = factory.createXMLEventReader(new BufferedReader(new FileReader(string)));
-        return reader;
     }
 
 }
