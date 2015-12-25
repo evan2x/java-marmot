@@ -4,8 +4,8 @@
   <groupId>cn.creditease</groupId>
   <artifactId>marmot</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.4</version>
-  <name>marmot Maven Webapp</name>
+  <version>0.1.7</version>
+  <name>Marmot Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
@@ -17,13 +17,13 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
+      <version>3.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>fastjson</artifactId>
-      <version>1.2.6</version>
+      <version>1.2.7</version>
     </dependency>
     <dependency>
       <groupId>org.freemarker</groupId>
@@ -58,6 +58,16 @@
           <port>8090</port>
           <path>/</path>
           <uriEncoding>UTF-8</uriEncoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>
