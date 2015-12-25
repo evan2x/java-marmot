@@ -195,7 +195,7 @@ public class Rewrite implements Filter {
     }
 
     /**
-     * 对context
+     * 提取Mock数据文件路径
      * @param map
      */
     private String getMockDataPath(HashMap<String, String> map){
@@ -208,6 +208,11 @@ public class Rewrite implements Filter {
         return target.substring(0, length);
     }
 
+    /**
+     * 规范化路径，用于匹配路由时的前置处理
+     * @param path
+     * @return
+     */
     private String pathnameNormalize(String path){
         if(path.startsWith("/")){
             path = path.substring(1, path.length());
