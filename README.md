@@ -1,5 +1,3 @@
-# Marmot
+# JAVA Marmot
 
 ---
-
-JAVA Marmot
