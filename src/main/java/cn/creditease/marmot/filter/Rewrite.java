@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 重写URL指向文件的过滤器
+ * @desc 重写URL
  * @author aiweizhang(aiweizhang@creditease.cn)
  * @date 2015/05/05
  */
@@ -40,7 +40,6 @@ public class Rewrite implements Filter {
 
     final private String ROUTE_SOURCE_KEY = "uri";
     final private String ROUTE_TARGET_KEY = "target";
-    final private String REWRITE_KEY = "X-REWRITE";
 
     @Override
     public void destroy() {}
@@ -51,19 +50,16 @@ public class Rewrite implements Filter {
         HttpServletResponse resp = (HttpServletResponse)response;
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
-        // 仅处理未重写的请求
-        if( req.getAttribute(REWRITE_KEY) == null ){
-            try {
-                if(processor(req, resp)){
-                    return;
-                }
-            } catch (XMLStreamException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+
+        try {
+            if(!processor(req, resp)){
+                chain.doFilter(request, response);
             }
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
-        chain.doFilter(request, response);
     }
 
     @Override
@@ -94,12 +90,12 @@ public class Rewrite implements Filter {
         ServletContext context = request.getSession().getServletContext();
         String pathname = request.getRequestURI().replaceAll("(/)+\\1", "$1");
         HashMap<String, String> routeResult = routeCrawler(pathname, context, this.routerEntry);
+
         String src = routeResult.get(ROUTE_SOURCE_KEY);
         String target = routeResult.get(ROUTE_TARGET_KEY);
 
         if(src != null && !src.equals("") && target != null && !target.equals("")){
             context.setAttribute("mockFile", getMockDataPath(routeResult));
-            request.setAttribute(REWRITE_KEY, true);
             request.getRequestDispatcher(target).forward(request, response);
             return true;
         }
@@ -117,8 +113,6 @@ public class Rewrite implements Filter {
      */
     private HashMap<String, String> routeCrawler(String pathname, ServletContext context,
                                                  String routerPath) throws IOException, XMLStreamException{
-
-
         HashMap<String, String> routeResult = new HashMap<>();
         URL routerFile = context.getResource(routerPath);
 

@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 加载模拟数据
+ * @desc 针对模板的模拟数据绑定
  * @author aiweizhang(aiweizhang@creditease.cn)
  * @date 2015/05/05
  */
@@ -81,7 +81,7 @@ public class Mock implements Filter {
                 request.getRequestDispatcher(item).include(request, response);
                 return true;
             } else {
-                JSONObject data = extractJSON(url);
+                JSONObject data = loadJSON(url);
                 for(String key : data.keySet()){
                     request.setAttribute(key, data.get(key));
                 }
@@ -96,7 +96,7 @@ public class Mock implements Filter {
      * @param url
      * @throws IOException
      */
-    private JSONObject extractJSON(URL url) throws IOException {
+    private JSONObject loadJSON(URL url) throws IOException {
         BufferedReader buffer = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
         String data = "";
         String line;
@@ -109,7 +109,7 @@ public class Mock implements Filter {
     }
 
     /**
-     * 获取mockdata的路径
+     * 获取mock data的路径
      * @param mockPath
      * @return
      */
