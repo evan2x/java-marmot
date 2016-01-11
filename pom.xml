@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cn.creditease</groupId>
   <artifactId>marmot</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1.7</version>
-  <name>Marmot Maven Webapp</name>
+  <packaging>jar</packaging>  
+  <version>0.2.0-Beta1</version>
+  <name>Marmot</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
@@ -17,7 +17,7 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
+      <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
