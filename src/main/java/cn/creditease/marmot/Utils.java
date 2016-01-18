@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -42,11 +43,11 @@ public class Utils {
             queryString = "?" + queryString;
         }
 
-        if(url.matches("^http(?:s)?://[\\s\\S]*$")){
+        if(url.matches("^(?i)http(?:s)?://[\\s\\S]*$")){
             url = url + uri + queryString;
         } else {
             String scheme = request.getScheme() + "://";
-            url = url.replaceAll("^(?:[a-z]+:/+)|(?:/*)", "");
+            url = url.replaceAll("^(?i)(?:[a-z]+:/+)|(?:/*)", "");
             url = scheme + url + uri + queryString;
         }
 
@@ -65,6 +66,12 @@ public class Utils {
         URL action = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) action.openConnection();
         setRequestHeader(request, connection);
+
+        try {
+            connection.connect();
+        } catch(ConnectException e){
+            throw new ConnectException("Failed to connect to " + url + ": Connection refused");
+        }
 
         int statusCode = connection.getResponseCode();
         if(statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP){
@@ -135,7 +142,7 @@ public class Utils {
             builder.append(line);
         }
 
-        if(!builder.toString().equals("")){
+        if(!builder.toString().isEmpty()){
             byte[] bytes = builder.toString().getBytes();
             connection.setDoOutput(true);
             connection.getOutputStream().write(bytes);

@@ -74,7 +74,7 @@ public class RewriteFilter implements Filter {
     @Override
     public void init(FilterConfig config) throws ServletException {
         String routerFilePath = config.getInitParameter("routerFile");
-        if(routerFilePath != null && !routerFilePath.equals("")){
+        if(routerFilePath != null && !routerFilePath.isEmpty()){
             if(!routerFilePath.startsWith("/")){
                 routerFilePath = "/" + routerFilePath;
             }
@@ -107,12 +107,12 @@ public class RewriteFilter implements Filter {
         String renderTemplate = route.getRenderTemplate();
 
         // 有效的路由
-        if(pathName != null && !pathName.equals("")){
+        if(pathName != null && !pathName.isEmpty()){
             // 当provider属性存在时, 优先使用provider中的地址发起请求
-            if(provider != null && !provider.equals("")){
+            if(provider != null && !provider.isEmpty()){
                 ResponseBean result = Utils.providerResource(provider, request, response);
                 // 当使用了本地渲染模板时, 模拟数据转交给mock filter处理
-                if(renderTemplate != null && !renderTemplate.equals("")){
+                if(renderTemplate != null && !renderTemplate.isEmpty()){
                     context.setAttribute("location", location);
                     context.setAttribute("data", result.getData());
                     context.setAttribute("url", result.getUrl());
@@ -129,7 +129,7 @@ public class RewriteFilter implements Filter {
                     return true;
                 }
             // 将请求直接转发到指定的location
-            } else if(location != null && !location.equals("")) {
+            } else if(location != null && !location.isEmpty()) {
                 context.setAttribute("location", location);
                 request.getRequestDispatcher(location).forward(request, response);
                 return true;
@@ -179,7 +179,7 @@ public class RewriteFilter implements Filter {
 
                 if(name.toString().equals(IMPORT_TAG) && scannedPaths.contains(scannedPath)){
                     Attribute src = start.getAttributeByName(new QName(SRC_ATTRIBUTE));
-                    if(src != null && !src.getValue().equals("")){
+                    if(src != null && !src.getValue().isEmpty()){
                         String importRouterPath = routerPath.replaceAll("[^/]+\\.xml$", "") + src.getValue();
                         route = routeCrawler(uri, context, importRouterPath, scannedPaths);
                         if(route.getPathName() != null){
@@ -244,9 +244,9 @@ public class RewriteFilter implements Filter {
         if(ruleAttr != null || oldRuleAttr != null){
 
             String rule = "";
-            if(ruleAttr != null && !ruleAttr.getValue().equals("")){
+            if(ruleAttr != null && !ruleAttr.getValue().isEmpty()){
                 rule = Utils.slashTrim(ruleAttr.getValue());
-            } else if(oldRuleAttr != null && !oldRuleAttr.getValue().equals("")) {
+            } else if(oldRuleAttr != null && !oldRuleAttr.getValue().isEmpty()) {
                 rule = Utils.slashTrim(oldRuleAttr.getValue());
             }
 
@@ -258,19 +258,19 @@ public class RewriteFilter implements Filter {
                 route.setPathRule(rule);
 
                 // 优先使用自身的provider属性,不存在的话使用route-map的provider
-                if(providerAttr != null && !providerAttr.getValue().equals("")){
+                if(providerAttr != null && !providerAttr.getValue().isEmpty()){
                     route.setProvider(providerAttr.getValue());
                 } else {
                     route.setProvider(parentProvider);
                 }
 
-                if(locationAttr != null && !locationAttr.getValue().equals("")){
+                if(locationAttr != null && !locationAttr.getValue().isEmpty()){
                     route.setLocation(locationAttr.getValue());
-                } else if(oldLocationAttr != null && !oldLocationAttr.getValue().equals("")) {
+                } else if(oldLocationAttr != null && !oldLocationAttr.getValue().isEmpty()) {
                     route.setLocation(oldLocationAttr.getValue());
                 }
 
-                if (renderTemplateAttr != null && !renderTemplateAttr.getValue().equals("")) {
+                if (renderTemplateAttr != null && !renderTemplateAttr.getValue().isEmpty()) {
                     route.setRenderTemplate(renderTemplateAttr.getValue());
                 }
             }

@@ -47,7 +47,7 @@ public class MockFilter implements Filter {
     @Override
     public void init(FilterConfig config) {
         String directory = config.getInitParameter("mockDir");
-        if (directory != null && !directory.equals("")) {
+        if (directory != null && !directory.isEmpty()) {
             this.mockDataDirectory = directory;
         }
     }
@@ -72,7 +72,7 @@ public class MockFilter implements Filter {
         String targetUrl = (String) context.getAttribute("url");
 
         // 绑定从provider取到的数据
-        if (data != null && !data.equals("")) {
+        if (data != null && !data.isEmpty()) {
             try {
                 requestBindData(request, data);
                 // 去除Content-Length, 使用Transfer-Encoding: chunked
