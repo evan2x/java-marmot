@@ -40,8 +40,9 @@ public class MockFilter implements Filter {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        processor(req, resp);
-        chain.doFilter(request, response);
+        if(processor(req, resp)){
+            chain.doFilter(request, response);
+        }
     }
 
     @Override
@@ -65,7 +66,7 @@ public class MockFilter implements Filter {
      * @throws ServletException
      * @throws IOException
      */
-    private void processor(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private Boolean processor(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         ServletContext context = request.getSession().getServletContext();
         String location = (String) context.getAttribute("location");
         String data = (String) context.getAttribute("data");
@@ -77,6 +78,7 @@ public class MockFilter implements Filter {
                 requestBindData(request, data);
                 // 去除Content-Length, 使用Transfer-Encoding: chunked
                 response.setContentLength(-1);
+                return true;
             } catch (JSONException e) {
                 throw new JSONException("("+ targetUrl +") API returns an invalid JSON");
             }
@@ -97,16 +99,19 @@ public class MockFilter implements Filter {
 
                 if(item.endsWith(".jsp")){
                     request.getRequestDispatcher(item).include(request, response);
+                    return true;
                 } else {
                     data = Utils.stream2string(resource.openStream());
                     try {
                         requestBindData(request, data);
+                        return true;
                     } catch (JSONException e) {
                         throw new JSONException("("+ item +") file content an invalid JSON");
                     }
                 }
             }
         }
+        return false;
     }
 
     /**
