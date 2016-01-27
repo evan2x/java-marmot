@@ -142,6 +142,10 @@ public class MockFilter implements Filter {
 
         mockPath = Utils.pathNormalize(this.mockDataDirectory + "/" + mockPath);
 
+        if(!mockPath.startsWith("/")){
+            mockPath = "/" + mockPath;
+        }
+
         return mockPath;
     }
 
