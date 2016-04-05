@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 路由规则
+ * @desc route bean
  * @author aiweizhang(aiweizhang@creditease.cn)
  * @date 2015/05/05
  */
@@ -12,9 +12,9 @@ public class RouteBean {
     private String pathRule;
     private String location;
     private String provider;
-    private String renderTemplate;
+    private String contentType;
 
-    public String getPathName(){
+    public String getPathName() {
         return pathName;
     }
 
@@ -46,11 +46,11 @@ public class RouteBean {
         this.provider = provider;
     }
 
-    public String getRenderTemplate() {
-        return renderTemplate;
+    public String getContentType() {
+        return contentType;
     }
 
-    public void setRenderTemplate(String renderTemplate) {
-        this.renderTemplate = renderTemplate;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }

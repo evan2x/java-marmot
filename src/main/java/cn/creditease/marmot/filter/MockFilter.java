@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.creditease.marmot.Utils;
+import cn.creditease.marmot.util;
 
 public class MockFilter implements Filter {
     private String mockDataDirectory = "/mock";
@@ -33,7 +33,8 @@ public class MockFilter implements Filter {
     public void destroy() {}
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
@@ -53,7 +54,7 @@ public class MockFilter implements Filter {
     }
 
     /**
-     * mock数据处理, 当context中存在data字段, 则直接用data数据填充至当前请求中
+     * mock数据处理, 当context中存在data字段, 则直接用data数据填充至当前request中
      * 否则从本地读取模板的mock数据, 本地路径为以'mockDir'参数的值为根目录的同名文件(不包括后缀名), 优先级为 1. '.jsp' 2. '.json'
      * 示例如下:
      * mockDir = /mock
@@ -65,7 +66,8 @@ public class MockFilter implements Filter {
      * @throws ServletException
      * @throws IOException
      */
-    private void processor(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private void processor(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
         ServletContext context = request.getSession().getServletContext();
         String location = (String) context.getAttribute("location");
         String data = (String) context.getAttribute("data");
@@ -74,14 +76,14 @@ public class MockFilter implements Filter {
         // 绑定从provider取到的数据
         if (data != null && !data.isEmpty()) {
             try {
-                requestBindData(request, data);
+                bindData(request, data);
                 // 去除Content-Length, 使用Transfer-Encoding: chunked
                 response.setContentLength(-1);
             } catch (JSONException e) {
                 throw new JSONException("("+ targetUrl +") API returns an invalid JSON");
             }
 
-        // 绑定本地数据
+        // 绑定本地数据, 目前只匹配json文件以及jsp文件
         } else {
             String mockPath = getMockPath(location);
             String[] tryTypes = new String[]{
@@ -97,10 +99,10 @@ public class MockFilter implements Filter {
 
                 if(item.endsWith(".jsp")){
                     request.getRequestDispatcher(item).include(request, response);
-                } else {
-                    data = Utils.stream2string(resource.openStream());
+                } else if(item.endsWith(".json")) {
+                    data = util.stream2string(resource.openStream());
                     try {
-                        requestBindData(request, data);
+                        bindData(request, data);
                     } catch (JSONException e) {
                         throw new JSONException("("+ item +") file content an invalid JSON");
                     }
@@ -110,14 +112,16 @@ public class MockFilter implements Filter {
     }
 
     /**
-     * request绑定数据, 将数据转为JSON后再设置到request的attribute中
+     * 绑定数据, 将数据转为JSON后设置到request的attribute中
      * @param request servlet request
      * @param stringData 字符串数据
      */
-    private void requestBindData(HttpServletRequest request, String stringData){
-        JSONObject data = JSON.parseObject(stringData);
-        for(String key : data.keySet()){
-            request.setAttribute(key, data.get(key));
+    private void bindData(HttpServletRequest request, String stringData){
+        if (stringData != null && !stringData.isEmpty()) {
+            JSONObject data = JSON.parseObject(stringData);
+            for(String key : data.keySet()){
+                request.setAttribute(key, data.get(key));
+            }
         }
     }
 
@@ -135,7 +139,7 @@ public class MockFilter implements Filter {
             mockPath = templatePath.substring(0, dotOffset);
         }
 
-        mockPath = Utils.pathNormalize(this.mockDataDirectory + "/" + mockPath);
+        mockPath = util.uniqueBySerialSlash(this.mockDataDirectory + "/" + mockPath);
 
         if(!mockPath.startsWith("/")){
             mockPath = "/" + mockPath;

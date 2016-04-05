@@ -1,31 +1,22 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @desc provider返回数据
+ * @desc remote data bean
  * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
+ * @date 2015/08/05
  */
 
 package cn.creditease.marmot.bean;
 
-public class ResponseBean {
+public class RemoteDataBean {
     private String url;
-    private int status;
     private String data;
 
-    public String getUrl(){
+    public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     public String getData() {
