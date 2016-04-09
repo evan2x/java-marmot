@@ -116,7 +116,7 @@ public class RewriteFilter implements Filter {
   private Boolean processor(HttpServletRequest request, HttpServletResponse response)
           throws IOException, ServletException, XMLStreamException {
     if (!this.routerEntry.endsWith(".xml")) {
-        return false;
+      return false;
     }
 
     ServletContext context = request.getSession().getServletContext();
@@ -147,7 +147,7 @@ public class RewriteFilter implements Filter {
           request.getRequestDispatcher(location).forward(request, response);
           return true;
 
-        // 其他情况一律直接返回远程数据
+          // 其他情况一律直接返回远程数据
         } else {
           String data = remoteData.getData();
 
@@ -163,7 +163,7 @@ public class RewriteFilter implements Filter {
           return true;
         }
 
-      // 将请求直接转发到指定的location
+        // 将请求直接转发到指定的location
       } else if (location != null && !location.isEmpty()) {
         context.setAttribute("location", location);
         request.getRequestDispatcher(location).forward(request, response);

@@ -83,12 +83,12 @@ public class MockFilter implements Filter {
         throw new JSONException("("+ targetUrl +") API returns an invalid JSON");
       }
 
-    // 绑定本地数据, 目前只匹配json文件以及jsp文件
+      // 绑定本地数据, 目前只匹配json文件以及jsp文件
     } else {
       String mockPath = getMockPath(location);
       String[] tryTypes = new String[]{
-        mockPath + ".jsp",
-        mockPath + ".json"
+              mockPath + ".jsp",
+              mockPath + ".json"
       };
 
       for (String item : tryTypes) {

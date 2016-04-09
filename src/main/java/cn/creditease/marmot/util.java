@@ -1,9 +1,9 @@
 /**
-* Copyright 2015 creditease Inc. All rights reserved.
-* @desc 工具类
-* @author aiweizhang(aiweizhang@creditease.cn)
-* @date 2015/05/05
-*/
+ * Copyright 2015 creditease Inc. All rights reserved.
+ * @desc 工具类
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ * @date 2015/05/05
+ */
 
 package cn.creditease.marmot;
 
@@ -92,8 +92,10 @@ public class util {
 
     InputStream inputStream;
     String contentEncoding = connection.getContentEncoding();
-    if (contentEncoding != null) {
-      try {
+    try {
+      if (contentEncoding == null) {
+        inputStream = connection.getInputStream();
+      } else {
         switch (contentEncoding.toLowerCase()) {
           case "gzip":
             inputStream = new GZIPInputStream(connection.getInputStream());
@@ -104,11 +106,9 @@ public class util {
           default:
             throw new IOException("Does not support the Content-Encoding: " + contentEncoding);
         }
-      } catch (IOException e) {
-        throw new IOException("Server returned HTTP response code: " + statusCode + " for URL: " + url);
       }
-    } else {
-      inputStream = connection.getInputStream();
+    } catch (IOException e) {
+      throw new IOException("Server returned HTTP response code: " + statusCode + " for URL: " + url);
     }
 
     RemoteDataBean remoteData = new RemoteDataBean();
@@ -157,10 +157,10 @@ public class util {
 
     // 单独处理Cookie
     String cookieByHeader = request.getHeader("cookie");
-    String cookieValue = "";
+    StringBuilder cookieBuilder = new StringBuilder();
 
     if (cookieByHeader != null && !cookieByHeader.isEmpty()) {
-      cookieValue = cookieByHeader;
+      cookieBuilder.append(cookieBuilder);
 
       for (Cookie cookie : cookies) {
         if (cookie == null) {
@@ -169,16 +169,16 @@ public class util {
 
         String cookieName = cookie.getName();
         if (!cookieByHeader.matches("[^\b]*\\b"+ cookieName +"=.+")) {
-          cookieValue += ";" + cookieName + "=" + cookie.getValue();
+          cookieBuilder.append(";").append(cookieName).append("=").append(cookie.getValue());
         }
       }
     } else {
       for (Cookie cookie : cookies) {
-        cookieValue += ";" + cookie.getName() + "=" + cookie.getValue();
+        cookieBuilder.append(";").append(cookie.getName()).append("=").append(cookie.getValue());
       }
     }
 
-    connection.setRequestProperty("cookie", cookieValue);
+    connection.setRequestProperty("cookie", cookieBuilder.toString());
 
     // 该请求由marmot发起
     connection.setRequestProperty("X-Requested-With", "MarmotHttpRequest");
