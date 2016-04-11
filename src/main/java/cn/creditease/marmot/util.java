@@ -1,9 +1,3 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 工具类
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
- */
 
 package cn.creditease.marmot;
 
@@ -28,6 +22,11 @@ import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
 import cn.creditease.marmot.bean.RemoteDataBean;
+
+/**
+ * 工具包
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class util {
   /**

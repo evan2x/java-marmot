@@ -1,14 +1,13 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc router bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
- */
 
 package cn.creditease.marmot.bean;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
+
+/**
+ * router bean
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class RouterBean {
   private RouteBean route = new RouteBean();

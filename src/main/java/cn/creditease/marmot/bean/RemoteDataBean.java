@@ -1,11 +1,10 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc remote data bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/08/05
- */
 
 package cn.creditease.marmot.bean;
+
+/**
+ * remote data bean
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class RemoteDataBean {
   private String url;

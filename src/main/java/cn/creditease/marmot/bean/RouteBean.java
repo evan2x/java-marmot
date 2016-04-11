@@ -1,11 +1,10 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc route bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
- */
 
 package cn.creditease.marmot.bean;
+
+/**
+ * route bean
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class RouteBean {
   private String pathName;

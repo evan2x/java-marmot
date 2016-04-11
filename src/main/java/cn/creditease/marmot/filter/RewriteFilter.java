@@ -1,9 +1,3 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 根据路由匹配重新定向请求地址
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
- */
 
 package cn.creditease.marmot.filter;
 
@@ -39,6 +33,11 @@ import cn.creditease.marmot.bean.RemoteDataBean;
 import cn.creditease.marmot.bean.RouteBean;
 import cn.creditease.marmot.bean.RouterBean;
 import cn.creditease.marmot.util;
+
+/**
+ * 根据路由匹配重新定向请求地址
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class RewriteFilter implements Filter {
 
@@ -139,7 +138,7 @@ public class RewriteFilter implements Filter {
           add("text/htm");
         }};
 
-        // 只有指定了路由的content-type为text/html或text/htm, 才会以远程数据渲染本地模板
+        // 只有指定了路由的content-type为text/html或text/htm, 才会用远程数据渲染本地模板
         if (contentType != null && !contentType.isEmpty() && contentTypes.contains(contentType.toLowerCase())) {
           context.setAttribute("location", location);
           context.setAttribute("url", remoteData.getUrl());
@@ -163,7 +162,7 @@ public class RewriteFilter implements Filter {
           return true;
         }
 
-        // 将请求直接转发到指定的location
+      // 将请求直接转发到指定的location
       } else if (location != null && !location.isEmpty()) {
         context.setAttribute("location", location);
         request.getRequestDispatcher(location).forward(request, response);
@@ -224,7 +223,7 @@ public class RewriteFilter implements Filter {
    * @param element 匹配到的路由节点
    * @return RouteBean
    */
-  private RouteBean convertRouteBean (String pathname, String defaultProvider, StartElement element) {
+  private RouteBean convertRouteBean (String pathname, String defaultProvider, String defaultContentType, StartElement element) {
     RouteBean route = new RouteBean();
 
     Attribute ruleAttr = element.getAttributeByName(new QName(RULE_ATTRIBUTE));
@@ -252,21 +251,24 @@ public class RewriteFilter implements Filter {
         route.setPathName(pathname);
         route.setPathRule(rule);
 
-        // 优先使用自身的provider属性,不存在的话使用默认的provider(由route-map或router标签上继承而来)
+        // 优先使用自身的provider属性,不存在的话使用默认的provider(由routes或router标签上继承而来)
         if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
           route.setProvider(providerAttr.getValue());
         } else {
           route.setProvider(defaultProvider);
         }
 
+        // 优先使用自身的content-type属性,不存在的话使用默认的content-type(由routes标签上继承而来)
+        if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
+          route.setContentType(util.extractContentType(contentTypeAttr.getValue()));
+        } else {
+          route.setContentType(defaultContentType);
+        }
+
         if (locationAttr != null && !locationAttr.getValue().isEmpty()) {
           route.setLocation(locationAttr.getValue());
         } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
           route.setLocation(targetAttr.getValue());
-        }
-
-        if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
-          route.setContentType(util.extractContentType(contentTypeAttr.getValue()));
         }
       }
     }
@@ -302,6 +304,7 @@ public class RewriteFilter implements Filter {
     boolean openRoutesTag = false;
     boolean openCookiesTag = false;
     String defaultProvider = "";
+    String defaultContentType = "";
 
     XMLInputFactory factory = XMLInputFactory.newInstance();
     XMLEventReader reader = factory.createXMLEventReader(context.getResourceAsStream(routerFilePath));
@@ -349,12 +352,17 @@ public class RewriteFilter implements Filter {
           if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
             defaultProvider = providerAttr.getValue();
           }
+
+          Attribute contentTypeAttr = start.getAttributeByName(new QName(CONTENT_TYPE_ATTRIBUTE));
+          if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
+            defaultContentType = contentTypeAttr.getValue();
+          }
           openRoutesTag = true;
         }
 
         // 转化route为bean
         if (name.equals(ROUTE_TAG) && openRoutesTag) {
-          route = convertRouteBean(pathname, defaultProvider, start);
+          route = convertRouteBean(pathname, defaultProvider, defaultContentType, start);
           // 路由匹配成功跳出循环
           if (route.getPathName() != null) {
             router.setRoute(route);

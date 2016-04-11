@@ -1,9 +1,3 @@
-/**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @desc 针对模板的模拟数据绑定
- * @author aiweizhang(aiweizhang@creditease.cn)
- * @date 2015/05/05
- */
 
 package cn.creditease.marmot.filter;
 
@@ -25,6 +19,11 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.creditease.marmot.util;
+
+/**
+ * 将模拟数据绑定到请求中, 以便渲染模板
+ * @author aiweizhang(aiweizhang@creditease.cn)
+ */
 
 public class MockFilter implements Filter {
   private String mockDataDirectory = "/mock";
