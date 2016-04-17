@@ -114,9 +114,6 @@ public class util {
     remoteData.setUrl(url);
     remoteData.setData(stream2string(inputStream));
 
-    for (Cookie cookie : cookies) {
-      response.addCookie(cookie);
-    }
     setResponseHeader(response, connection);
     response.setHeader("X-Target-Url", url);
 

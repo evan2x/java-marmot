@@ -130,9 +130,17 @@ public class RewriteFilter implements Filter {
 
     // 路由匹配成功
     if (router.isMatched()) {
+      List<Cookie> cookies = router.getCookies();
+
+      if (cookies != null) {
+        for (Cookie cookie : cookies) {
+          response.addCookie(cookie);
+        }
+      }
+
       // provider属性存在时, 该路由会被转发到provider中指定的地址
       if (provider != null && !provider.isEmpty()) {
-        RemoteDataBean remoteData = util.requestRemoteData(provider, router.getCookies(), request, response);
+        RemoteDataBean remoteData = util.requestRemoteData(provider, cookies, request, response);
         List<String> contentTypes = new ArrayList<String>(){{
           add("text/html");
           add("text/htm");
