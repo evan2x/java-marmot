@@ -23,11 +23,6 @@ import java.util.zip.GZIPInputStream;
 
 import cn.creditease.marmot.bean.RemoteDataBean;
 
-/**
- * 工具包
- * @author aiweizhang(aiweizhang@creditease.cn)
- */
-
 public class util {
   /**
    * 使用指定provider请求远程数据

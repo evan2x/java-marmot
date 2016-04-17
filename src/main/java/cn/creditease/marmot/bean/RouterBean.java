@@ -4,11 +4,6 @@ package cn.creditease.marmot.bean;
 import javax.servlet.http.Cookie;
 import java.util.List;
 
-/**
- * router bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- */
-
 public class RouterBean {
   private RouteBean route = new RouteBean();
   private List<Cookie> cookies;

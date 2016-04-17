@@ -22,7 +22,6 @@ import cn.creditease.marmot.util;
 
 /**
  * 将模拟数据绑定到请求中, 以便渲染模板
- * @author aiweizhang(aiweizhang@creditease.cn)
  */
 
 public class MockFilter implements Filter {

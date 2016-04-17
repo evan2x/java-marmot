@@ -1,11 +1,6 @@
 
 package cn.creditease.marmot.bean;
 
-/**
- * remote data bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- */
-
 public class RemoteDataBean {
   private String url;
   private String data;

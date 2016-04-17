@@ -1,11 +1,6 @@
 
 package cn.creditease.marmot.bean;
 
-/**
- * route bean
- * @author aiweizhang(aiweizhang@creditease.cn)
- */
-
 public class RouteBean {
   private String pathName;
   private String pathRule;

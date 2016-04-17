@@ -36,7 +36,6 @@ import cn.creditease.marmot.util;
 
 /**
  * 根据路由匹配重新定向请求地址
- * @author aiweizhang(aiweizhang@creditease.cn)
  */
 
 public class RewriteFilter implements Filter {
