@@ -137,6 +137,10 @@ public class RewriteFilter implements Filter {
         }
       }
 
+      if (contentType != null && !contentType.isEmpty()) {
+        response.setContentType(contentType);
+      }
+
       // provider属性存在时, 该路由会被转发到provider中指定的地址
       if (provider != null && !provider.isEmpty()) {
         RemoteDataBean remoteData = util.requestRemoteData(provider, cookies, request, response);
@@ -172,7 +176,12 @@ public class RewriteFilter implements Filter {
       // 将请求直接转发到指定的location
       } else if (location != null && !location.isEmpty()) {
         context.setAttribute("location", location);
-        request.getRequestDispatcher(location).forward(request, response);
+        if (contentType != null && !contentType.isEmpty()) {
+          request.getRequestDispatcher(location).include(request, response);
+        } else {
+          request.getRequestDispatcher(location).forward(request, response);
+        }
+
         return true;
       }
     }
