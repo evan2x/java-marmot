@@ -120,7 +120,8 @@ public class RewriteFilter implements Filter {
     ServletContext context = request.getSession().getServletContext();
     String uri = util.uniqueBySerialSlash(request.getRequestURI());
     Set<String> scannedPaths = new HashSet<>();
-    RouterBean router = routerParser(uri, context, this.routerEntry, scannedPaths);
+    boolean openRouterTag = false;
+    RouterBean router = routerParser(uri, context, this.routerEntry, scannedPaths, openRouterTag);
     RouteBean route = router.getRoute();
 
     String provider = route.getProvider();
@@ -301,7 +302,7 @@ public class RewriteFilter implements Filter {
    * @throws MalformedURLException
    * @throws XMLStreamException
    */
-  private RouterBean routerParser(String pathname, ServletContext context, String routerFilePath, Set<String> scannedFilePaths)
+  private RouterBean routerParser(String pathname, ServletContext context, String routerFilePath, Set<String> scannedFilePaths, boolean openRouterTag)
           throws MalformedURLException, XMLStreamException {
 
     RouterBean router = new RouterBean();
@@ -316,7 +317,6 @@ public class RewriteFilter implements Filter {
     String scannedFilePath = routerUrl.getPath();
     scannedFilePaths.add(scannedFilePath);
 
-    boolean openRouterTag = false;
     boolean openRoutesTag = false;
     boolean openCookiesTag = false;
     String defaultProvider = "";
@@ -355,7 +355,7 @@ public class RewriteFilter implements Filter {
           Attribute srcAttr = start.getAttributeByName(new QName(SRC_ATTRIBUTE));
           if (srcAttr != null && !srcAttr.getValue().isEmpty()) {
             String importFilePath = routerFilePath.replaceAll("[^/]+\\.xml$", "") + srcAttr.getValue();
-            router = routerParser(pathname, context, importFilePath, scannedFilePaths);
+            router = routerParser(pathname, context, importFilePath, scannedFilePaths, openRouterTag);
             if (router.isMatched()) {
               return router;
             }
