@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -47,6 +44,7 @@ public class RewriteFilter implements Filter {
   private static final String LOCATION_ATTRIBUTE = "location";
   private static final String PROVIDER_ATTRIBUTE = "provider";
   private static final String CONTENT_TYPE_ATTRIBUTE = "content-type";
+  private static final String REDIRECT_ATTRIBUTE = "redirect";
 
   /** @deprecated */
   private static final String URI_ATTRIBUTE = "uri";
@@ -82,8 +80,9 @@ public class RewriteFilter implements Filter {
     req.setCharacterEncoding("UTF-8");
     resp.setCharacterEncoding("UTF-8");
 
+
     try {
-      if(!processor(req, resp)){
+      if (!processor(req, resp)) {
         chain.doFilter(request, response);
       }
     } catch (XMLStreamException e) {
@@ -111,7 +110,7 @@ public class RewriteFilter implements Filter {
    * @throws ServletException
    * @throws IOException
    */
-  private Boolean processor(HttpServletRequest request, HttpServletResponse response)
+  private boolean processor(HttpServletRequest request, HttpServletResponse response)
           throws IOException, ServletException, XMLStreamException {
     if (!this.routerEntry.endsWith(".xml")) {
       return false;
@@ -120,26 +119,28 @@ public class RewriteFilter implements Filter {
     ServletContext context = request.getSession().getServletContext();
     String uri = util.uniqueBySerialSlash(request.getRequestURI());
     Set<String> scannedPaths = new HashSet<>();
-    boolean openRouterTag = false;
-    RouterBean router = routerParser(uri, context, this.routerEntry, scannedPaths, openRouterTag);
+    RouterBean router = routerParser(uri, context, this.routerEntry, scannedPaths, false);
     RouteBean route = router.getRoute();
 
     String provider = route.getProvider();
     String location = route.getLocation();
+    String redirect = route.getRedirect();
     String contentType = route.getContentType();
 
     // 路由匹配成功
     if (router.isMatched()) {
       List<Cookie> cookies = router.getCookies();
 
+      // 请求重定向
+      if(redirect != null && !redirect.isEmpty()) {
+        response.sendRedirect(redirect);
+        return true;
+      }
+
       if (cookies != null) {
         for (Cookie cookie : cookies) {
           response.addCookie(cookie);
         }
-      }
-
-      if (contentType != null && !contentType.isEmpty()) {
-        response.setContentType(contentType);
       }
 
       // provider属性存在时, 该路由会被转发到provider中指定的地址
@@ -162,26 +163,20 @@ public class RewriteFilter implements Filter {
         } else {
           String data = remoteData.getData();
 
-          if (data == null) {
-            return false;
+          if (data != null) {
+            PrintWriter writer = response.getWriter();
+            writer.write(data);
+            writer.flush();
+            writer.close();
           }
-
-          PrintWriter writer = response.getWriter();
-          writer.write(data);
-          writer.flush();
-          writer.close();
 
           return true;
         }
 
-      // 将请求直接转发到指定的location
+        // 将请求直接转发到指定的location
       } else if (location != null && !location.isEmpty()) {
         context.setAttribute("location", location);
-        if (contentType != null && !contentType.isEmpty()) {
-          request.getRequestDispatcher(location).include(request, response);
-        } else {
-          request.getRequestDispatcher(location).forward(request, response);
-        }
+        request.getRequestDispatcher(location).forward(request, response);
 
         return true;
       }
@@ -246,6 +241,7 @@ public class RewriteFilter implements Filter {
     Attribute ruleAttr = element.getAttributeByName(new QName(RULE_ATTRIBUTE));
     Attribute locationAttr = element.getAttributeByName(new QName(LOCATION_ATTRIBUTE));
     Attribute providerAttr = element.getAttributeByName(new QName(PROVIDER_ATTRIBUTE));
+    Attribute redirectAttr = element.getAttributeByName(new QName(REDIRECT_ATTRIBUTE));
     Attribute contentTypeAttr = element.getAttributeByName(new QName(CONTENT_TYPE_ATTRIBUTE));
 
     /** @deprecated */
@@ -286,6 +282,10 @@ public class RewriteFilter implements Filter {
           route.setLocation(locationAttr.getValue());
         } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
           route.setLocation(targetAttr.getValue());
+        }
+
+        if (redirectAttr !=null && !redirectAttr.getValue().isEmpty()) {
+          route.setRedirect(redirectAttr.getValue());
         }
       }
     }

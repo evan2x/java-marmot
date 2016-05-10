@@ -6,6 +6,7 @@ public class RouteBean {
   private String pathRule;
   private String location;
   private String provider;
+  private String redirect;
   private String contentType;
 
   public String getPathName() {
@@ -46,5 +47,13 @@ public class RouteBean {
 
   public void setContentType(String contentType) {
     this.contentType = contentType;
+  }
+
+  public String getRedirect() {
+    return redirect;
+  }
+
+  public void setRedirect(String redirect) {
+    this.redirect = redirect;
   }
 }
