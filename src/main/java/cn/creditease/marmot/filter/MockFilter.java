@@ -28,7 +28,12 @@ public class MockFilter implements Filter {
   private String mockDataDirectory = "/mock";
 
   @Override
-  public void destroy() {}
+  public void init(FilterConfig config) {
+    String directory = config.getInitParameter("mockDir");
+    if (directory != null && !directory.isEmpty()) {
+      this.mockDataDirectory = directory;
+    }
+  }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -44,12 +49,7 @@ public class MockFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig config) {
-    String directory = config.getInitParameter("mockDir");
-    if (directory != null && !directory.isEmpty()) {
-      this.mockDataDirectory = directory;
-    }
-  }
+  public void destroy() {}
 
   /**
    * mock数据处理, 当context中存在data字段, 则直接用data数据填充至当前request中
@@ -68,6 +68,7 @@ public class MockFilter implements Filter {
           throws IOException, ServletException {
     ServletContext context = request.getSession().getServletContext();
     String location = (String) context.getAttribute("location");
+    String contentType = (String) context.getAttribute("contentType");
     String data = (String) context.getAttribute("data");
     String targetUrl = (String) context.getAttribute("url");
 
