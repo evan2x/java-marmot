@@ -261,12 +261,12 @@ public class RewriteFilter implements Filter {
 
       String rule = "";
       if (ruleAttr != null && !ruleAttr.getValue().isEmpty()) {
-        rule = util.trimBySlash(ruleAttr.getValue());
+        rule = util.trimSlash(ruleAttr.getValue());
       } else if (uriAttr != null && !uriAttr.getValue().isEmpty()) {
-        rule = util.trimBySlash(uriAttr.getValue());
+        rule = util.trimSlash(uriAttr.getValue());
       }
 
-      pathname = util.trimBySlash(pathname);
+      pathname = util.trimSlash(pathname);
       // 路由匹配成功
       if (pathname.matches(rule)) {
         route.setPathName(pathname);

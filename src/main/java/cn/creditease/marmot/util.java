@@ -338,7 +338,7 @@ public class util {
    * @param path 原路径
    * @return 去除了首尾斜杠"/"的路径
    */
-  public static String trimBySlash(String path){
+  public static String trimSlash(String path){
     if (path.startsWith("/")) {
       path = path.substring(1, path.length());
     }
