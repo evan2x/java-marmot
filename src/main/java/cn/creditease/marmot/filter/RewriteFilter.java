@@ -157,7 +157,6 @@ public class RewriteFilter implements Filter {
         // 只有指定了路由的content-type为text/html或text/htm, 才会用远程数据渲染本地模板
         if (contentType != null && !contentType.isEmpty() && contentTypes.contains(contentType.toLowerCase())) {
           context.setAttribute("location", location);
-          context.setAttribute("contentType", contentType);
           context.setAttribute("url", remoteData.getUrl());
           context.setAttribute("data", remoteData.getData());
           request.getRequestDispatcher(location).forward(request, response);

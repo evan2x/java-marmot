@@ -107,7 +107,7 @@ public class util {
 
     RemoteDataBean remoteData = new RemoteDataBean();
     remoteData.setUrl(url);
-    remoteData.setData(stream2string(inputStream));
+    remoteData.setData(stream2string(inputStream).trim());
 
     setResponseHeader(response, connection);
     response.setHeader("X-Target-Url", url);
@@ -151,21 +151,17 @@ public class util {
     StringBuilder cookieBuilder = new StringBuilder();
 
     if (cookieByHeader != null && !cookieByHeader.isEmpty()) {
-      cookieBuilder.append(cookieBuilder);
-
+      cookieBuilder.append(cookieByHeader);
+    } else {
+      cookieByHeader = "";
+    }
+    if (cookies != null && !cookies.isEmpty()) {
       for (Cookie cookie : cookies) {
-        if (cookie == null) {
-          continue;
-        }
 
         String cookieName = cookie.getName();
-        if (!cookieByHeader.matches("[^\b]*\\b"+ cookieName +"=.+")) {
-          cookieBuilder.append(";").append(cookieName).append("=").append(cookie.getValue());
+        if (cookieByHeader.isEmpty() || cookieByHeader.matches("[^\b]*\\b"+ cookieName +"=.+")) {
+          cookieBuilder.append(";").append(cookie.getName()).append("=").append(cookie.getValue());
         }
-      }
-    } else {
-      for (Cookie cookie : cookies) {
-        cookieBuilder.append(";").append(cookie.getName()).append("=").append(cookie.getValue());
       }
     }
 

@@ -68,7 +68,6 @@ public class MockFilter implements Filter {
           throws IOException, ServletException {
     ServletContext context = request.getSession().getServletContext();
     String location = (String) context.getAttribute("location");
-    String contentType = (String) context.getAttribute("contentType");
     String data = (String) context.getAttribute("data");
     String targetUrl = (String) context.getAttribute("url");
 
