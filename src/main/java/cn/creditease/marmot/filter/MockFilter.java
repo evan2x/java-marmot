@@ -67,9 +67,9 @@ public class MockFilter implements Filter {
   private void processor(HttpServletRequest request, HttpServletResponse response)
           throws IOException, ServletException {
     ServletContext context = request.getSession().getServletContext();
-    String location = (String) context.getAttribute("location");
-    String data = (String) context.getAttribute("data");
-    String targetUrl = (String) context.getAttribute("url");
+    String location = (String) request.getAttribute("location");
+    String data = (String) request.getAttribute("data");
+    String targetUrl = (String) request.getAttribute("url");
 
     // 绑定从provider取到的数据
     if (data != null && !data.isEmpty()) {

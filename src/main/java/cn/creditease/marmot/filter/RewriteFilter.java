@@ -115,10 +115,8 @@ public class RewriteFilter implements Filter {
       return false;
     }
 
-    ServletContext context = request.getSession().getServletContext();
-    String uri = util.uniqueBySerialSlash(request.getRequestURI());
     Set<String> scannedPaths = new HashSet<>();
-    RouterBean router = routerParser(uri, context, this.routerEntry, scannedPaths, false);
+    RouterBean router = routerParser(request, this.routerEntry, scannedPaths, false);
     RouteBean route = router.getRoute();
 
     String provider = route.getProvider();
@@ -156,9 +154,9 @@ public class RewriteFilter implements Filter {
 
         // 只有指定了路由的content-type为text/html或text/htm, 才会用远程数据渲染本地模板
         if (contentType != null && !contentType.isEmpty() && contentTypes.contains(contentType.toLowerCase())) {
-          context.setAttribute("location", location);
-          context.setAttribute("url", remoteData.getUrl());
-          context.setAttribute("data", remoteData.getData());
+          request.setAttribute("location", location);
+          request.setAttribute("url", remoteData.getUrl());
+          request.setAttribute("data", remoteData.getData());
           request.getRequestDispatcher(location).forward(request, response);
           return true;
 
@@ -178,7 +176,7 @@ public class RewriteFilter implements Filter {
 
         // 将请求直接转发到指定的location
       } else if (location != null && !location.isEmpty()) {
-        context.setAttribute("location", location);
+        request.setAttribute("location", location);
         if (contentType != null && !contentType.isEmpty()) {
           request.getRequestDispatcher(location).include(request, response);
         } else {
@@ -237,12 +235,12 @@ public class RewriteFilter implements Filter {
 
   /**
    * 将当前匹配到的结果转化为RouteBean
-   * @param pathname 当前请求的url路径
+   * @param uri 当前请求的url路径
    * @param defaultProvider 路由父级标签的provider
    * @param element 匹配到的路由节点
    * @return RouteBean
    */
-  private RouteBean convertRouteBean (String pathname, String defaultProvider, String defaultContentType, StartElement element) {
+  private RouteBean convertRouteBean (String uri, String defaultProvider, String defaultContentType, StartElement element) {
     RouteBean route = new RouteBean();
 
     Attribute ruleAttr = element.getAttributeByName(new QName(RULE_ATTRIBUTE));
@@ -265,10 +263,10 @@ public class RewriteFilter implements Filter {
         rule = util.trimSlash(uriAttr.getValue());
       }
 
-      pathname = util.trimSlash(pathname);
+      uri = util.trimSlash(uri);
       // 路由匹配成功
-      if (pathname.matches(rule)) {
-        route.setPathName(pathname);
+      if (uri.matches(rule)) {
+        route.setPathName(uri);
         route.setPathRule(rule);
 
         // 优先使用自身的provider属性,不存在的话使用默认的provider(由routes或router标签上继承而来)
@@ -302,19 +300,20 @@ public class RewriteFilter implements Filter {
 
   /**
    * 路由解析器
-   * @param pathname 请求的uri路径
-   * @param context servlet的上下文
+   * @param request 请求对象
    * @param routerFilePath 路由入口文件路径
    * @return 返回一个RouteBean, 包含了路由匹配结果
    * @throws MalformedURLException
    * @throws XMLStreamException
    */
-  private RouterBean routerParser(String pathname, ServletContext context, String routerFilePath, Set<String> scannedFilePaths, boolean openRouterTag)
+  private RouterBean routerParser(HttpServletRequest request, String routerFilePath, Set<String> scannedFilePaths, boolean openRouterTag)
           throws MalformedURLException, XMLStreamException {
 
     RouterBean router = new RouterBean();
     List<Cookie> cookies = new ArrayList<>();
     RouteBean route;
+    ServletContext context = request.getSession().getServletContext();
+    String uri = util.uniqueBySerialSlash(request.getRequestURI());
 
     URL routerUrl = context.getResource(routerFilePath);
     if (routerUrl == null) {
@@ -362,7 +361,7 @@ public class RewriteFilter implements Filter {
           Attribute srcAttr = start.getAttributeByName(new QName(SRC_ATTRIBUTE));
           if (srcAttr != null && !srcAttr.getValue().isEmpty()) {
             String importFilePath = routerFilePath.replaceAll("[^/]+\\.xml$", "") + srcAttr.getValue();
-            router = routerParser(pathname, context, importFilePath, scannedFilePaths, openRouterTag);
+            router = routerParser(request, importFilePath, scannedFilePaths, openRouterTag);
             if (router.isMatched()) {
               return router;
             }
@@ -385,7 +384,7 @@ public class RewriteFilter implements Filter {
 
         // 转化route为bean
         if (name.equals(ROUTE_TAG) && openRoutesTag) {
-          route = convertRouteBean(pathname, defaultProvider, defaultContentType, start);
+          route = convertRouteBean(uri, defaultProvider, defaultContentType, start);
           // 路由匹配成功跳出循环
           if (route.getPathName() != null) {
             router.setRoute(route);
