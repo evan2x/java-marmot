@@ -16,7 +16,7 @@ maven 仓库地址配置
 
 ```xml
 <repository>
-    <id>marmot-support</id>
+    <id>marmot</id>
     <url>https://raw.githubusercontent.com/evan2x/java-marmot/master/repository</url>
 </repository>
 ```
