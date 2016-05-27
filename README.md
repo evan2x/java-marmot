@@ -32,7 +32,7 @@ maven 依赖配置
 </dependency>
 ```
 
-SpringMVC 拦截器:
+让SpringMVC支持Marmot provider 视图的拦截器:
 
 ```java
 com.creditease.marmot.support.spring.ProviderViewInterceptor
