@@ -1,5 +1,5 @@
 
-package cn.creditease.marmot;
+package com.creditease.marmot;
 
 import javax.lang.model.type.UnknownTypeException;
 import javax.servlet.http.Cookie;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
-import cn.creditease.marmot.bean.RemoteDataBean;
+import com.creditease.marmot.bean.RemoteDataBean;
 
 public class util {
   /**

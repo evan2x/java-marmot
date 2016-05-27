@@ -1,5 +1,5 @@
 
-package cn.creditease.marmot.filter;
+package com.creditease.marmot.filter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,10 +26,10 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import cn.creditease.marmot.bean.RemoteDataBean;
-import cn.creditease.marmot.bean.RouteBean;
-import cn.creditease.marmot.bean.RouterBean;
-import cn.creditease.marmot.util;
+import com.creditease.marmot.bean.RemoteDataBean;
+import com.creditease.marmot.bean.RouteBean;
+import com.creditease.marmot.bean.RouterBean;
+import com.creditease.marmot.util;
 
 /**
  * 根据路由匹配重新定向请求地址

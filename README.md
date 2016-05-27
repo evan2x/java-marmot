@@ -17,7 +17,7 @@ maven 仓库地址配置
 ```xml
 <repository>
     <id>marmot-support</id>
-    <url>https://raw.githubusercontent.com/evan2x/marmot-support/master/repository</url>
+    <url>https://raw.githubusercontent.com/evan2x/java-marmot/master/repository</url>
 </repository>
 ```
 
@@ -26,8 +26,14 @@ maven 依赖配置
 ```xml
 
 <dependency>
-    <groupId>cn.creditease</groupId>
+    <groupId>com.creditease</groupId>
     <artifactId>marmot</artifactId>
     <version>0.3.6</version>
 </dependency>
+```
+
+SpringMVC 拦截器:
+
+```java
+com.creditease.marmot.support.spring.ProviderViewInterceptor
 ```

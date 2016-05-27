@@ -1,5 +1,5 @@
 
-package cn.creditease.marmot.bean;
+package com.creditease.marmot.bean;
 
 public class RouteBean {
   private String pathName;

@@ -2,4 +2,4 @@
 
 directory=$(pwd)
 
-mvn deploy -DaltDeploymentRepository=marmot-support::default::file:${directory}/repository/
+mvn deploy -DaltDeploymentRepository=java-marmot::default::file:${directory}/repository/

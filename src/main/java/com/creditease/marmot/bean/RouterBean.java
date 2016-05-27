@@ -1,5 +1,5 @@
 
-package cn.creditease.marmot.bean;
+package com.creditease.marmot.bean;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
