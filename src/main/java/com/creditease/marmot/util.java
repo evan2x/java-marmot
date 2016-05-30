@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
-import com.creditease.marmot.bean.RemoteDataBean;
+import com.creditease.marmot.object.RemoteData;
 
 public class util {
   /**
@@ -33,7 +33,7 @@ public class util {
    * @return RemoteDataBean
    * @throws IOException
    */
-  public static RemoteDataBean requestRemoteData(String hostPath, List<Cookie> cookies, HttpServletRequest request, HttpServletResponse response)
+  public static RemoteData requestRemoteData(String hostPath, List<Cookie> cookies, HttpServletRequest request, HttpServletResponse response)
           throws IOException {
     String queryString = request.getQueryString();
     String uri = request.getRequestURI();
@@ -64,7 +64,7 @@ public class util {
    * @return RemoteDataBean
    * @throws IOException
    */
-  private static RemoteDataBean sendRequest(String url, List<Cookie> cookies, HttpServletRequest request, HttpServletResponse response)
+  private static RemoteData sendRequest(String url, List<Cookie> cookies, HttpServletRequest request, HttpServletResponse response)
           throws IOException, UnknownTypeException {
     URL action = new URL(url);
     HttpURLConnection connection = (HttpURLConnection) action.openConnection();
@@ -105,7 +105,7 @@ public class util {
       throw new IOException("Server returned HTTP response code: " + statusCode + " for URL: " + url);
     }
 
-    RemoteDataBean remoteData = new RemoteDataBean();
+    RemoteData remoteData = new RemoteData();
     remoteData.setUrl(url);
     remoteData.setData(stream2string(inputStream).trim());
 

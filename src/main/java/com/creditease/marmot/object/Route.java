@@ -1,7 +1,6 @@
+package com.creditease.marmot.object;
 
-package com.creditease.marmot.bean;
-
-public class RouteBean {
+public class Route {
   private String pathName;
   private String pathRule;
   private String location;

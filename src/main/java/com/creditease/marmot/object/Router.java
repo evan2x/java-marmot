@@ -1,19 +1,19 @@
-
-package com.creditease.marmot.bean;
+package com.creditease.marmot.object;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
 
-public class RouterBean {
-  private RouteBean route = new RouteBean();
+public class Router {
+
+  private Route route = new Route();
   private List<Cookie> cookies;
   private boolean matched = false;
 
-  public RouteBean getRoute() {
+  public Route getRoute() {
     return route;
   }
 
-  public void setRoute(RouteBean route) {
+  public void setRoute(Route route) {
     this.route = route;
   }
 

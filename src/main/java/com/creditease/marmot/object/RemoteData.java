@@ -1,7 +1,6 @@
+package com.creditease.marmot.object;
 
-package com.creditease.marmot.bean;
-
-public class RemoteDataBean {
+public class RemoteData {
   private String url;
   private String data;
 
