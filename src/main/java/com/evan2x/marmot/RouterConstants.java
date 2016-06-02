@@ -1,4 +1,4 @@
-package com.creditease.marmot;
+package com.evan2x.marmot;
 
 public interface RouterConstants {
 

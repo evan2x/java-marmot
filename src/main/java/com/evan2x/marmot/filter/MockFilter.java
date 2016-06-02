@@ -1,5 +1,5 @@
 
-package com.creditease.marmot.filter;
+package com.evan2x.marmot.filter;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
-import com.creditease.marmot.util;
+import com.evan2x.marmot.util;
 
 /**
  * 将模拟数据绑定到请求中, 以便渲染模板

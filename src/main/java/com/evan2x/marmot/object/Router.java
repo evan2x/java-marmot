@@ -1,4 +1,4 @@
-package com.creditease.marmot.object;
+package com.evan2x.marmot.object;
 
 import javax.servlet.http.Cookie;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.creditease.marmot.object;
+package com.evan2x.marmot.object;
 
 public class Route {
   private String pathName;

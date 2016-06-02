@@ -1,4 +1,4 @@
-package com.creditease.marmot.support.spring;
+package com.evan2x.marmot.support.spring;
 
 import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import org.springframework.web.servlet.ModelAndView;

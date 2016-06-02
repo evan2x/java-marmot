@@ -1,5 +1,5 @@
 
-package com.creditease.marmot;
+package com.evan2x.marmot;
 
 import javax.lang.model.type.UnknownTypeException;
 import javax.servlet.http.Cookie;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
-import com.creditease.marmot.object.RemoteData;
+import com.evan2x.marmot.object.RemoteData;
 
 public class util {
   /**
