@@ -26,7 +26,7 @@ maven 依赖配置
 ```xml
 
 <dependency>
-    <groupId>com.creditease</groupId>
+    <groupId>com.evan2x</groupId>
     <artifactId>marmot</artifactId>
     <version>0.3.6</version>
 </dependency>
