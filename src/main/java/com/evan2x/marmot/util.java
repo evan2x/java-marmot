@@ -322,7 +322,7 @@ public class util {
 
   /**
    * 将多个斜杠"/"替换为一个
-   * @param path 未经过处理的路径
+   * @param path 待处理路径
    * @return 替换后的路径
    */
   public static String uniqueBySerialSlash(String path){
@@ -331,7 +331,7 @@ public class util {
 
   /**
    * 去除路径中首尾的斜杠"/"
-   * @param path 原路径
+   * @param path 待处理路径
    * @return 去除了首尾斜杠"/"的路径
    */
   public static String trimSlash(String path){
@@ -344,5 +344,19 @@ public class util {
     }
 
     return path;
+  }
+
+  /**
+   * 根据matcher匹配到的子分组，对字符串中的$1,$2,$3....替换为指定分组中的内容
+   * @param matcher 匹配组
+   * @param str 待处理字符串
+   * @return 经过替换的字符串
+   */
+  public static String replaceByMatcher(Matcher matcher, String str) {
+    for (int i = 1; i <= matcher.groupCount(); i++) {
+      str = str.replace("$" + i, matcher.group(i));
+    }
+
+    return str;
   }
 }

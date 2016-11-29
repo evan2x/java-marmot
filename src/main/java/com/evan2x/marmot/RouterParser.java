@@ -19,6 +19,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RouterParser {
 
@@ -217,8 +219,11 @@ public class RouterParser {
       }
 
       uri = util.trimSlash(uri);
+      Pattern pattern = Pattern.compile(rule);
+      Matcher matcher = pattern.matcher(uri);
+
       // 路由匹配成功
-      if (uri.matches(rule)) {
+      if (matcher.find()) {
         route.setPathName(uri);
         route.setPathRule(rule);
 
@@ -237,13 +242,13 @@ public class RouterParser {
         }
 
         if (locationAttr != null && !locationAttr.getValue().isEmpty()) {
-          route.setLocation(locationAttr.getValue());
+          route.setLocation(util.replaceByMatcher(matcher, locationAttr.getValue()));
         } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
-          route.setLocation(targetAttr.getValue());
+          route.setLocation(util.replaceByMatcher(matcher, targetAttr.getValue()));
         }
 
-        if (redirectAttr !=null && !redirectAttr.getValue().isEmpty()) {
-          route.setRedirect(redirectAttr.getValue());
+        if (redirectAttr != null && !redirectAttr.getValue().isEmpty()) {
+          route.setRedirect(util.replaceByMatcher(matcher, redirectAttr.getValue()));
         }
       }
     }
