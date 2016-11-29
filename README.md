@@ -9,7 +9,7 @@ $ mvn clean package
 将仓库部署到当前目录下, 使用GitHub作为仓库地址
 
 ```shell
-$ ./scripts.deploy.sh
+$ ./scripts/deploy.sh
 ```
 
 maven 仓库地址配置
