@@ -218,37 +218,47 @@ public class RouterParser {
         rule = util.trimSlash(uriAttr.getValue());
       }
 
+      if (!rule.startsWith("^")) {
+        rule = "^" + rule;
+      }
+
+      if (!rule.endsWith("$")) {
+        rule += "$";
+      }
+
       uri = util.trimSlash(uri);
-      Pattern pattern = Pattern.compile(rule);
-      Matcher matcher = pattern.matcher(uri);
+      if (!rule.isEmpty() && !uri.isEmpty()) {
+        Pattern pattern = Pattern.compile(rule);
+        Matcher matcher = pattern.matcher(uri);
 
-      // 路由匹配成功
-      if (matcher.find()) {
-        route.setPathName(uri);
-        route.setPathRule(rule);
+        // 路由匹配成功
+        if (matcher.find()) {
+          route.setPathName(uri);
+          route.setPathRule(rule);
 
-        // 优先使用自身的provider属性,不存在的话使用默认的provider(由routes或router标签上继承而来)
-        if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
-          route.setProvider(providerAttr.getValue());
-        } else {
-          route.setProvider(defaultProvider);
-        }
+          // 优先使用自身的provider属性,不存在的话使用默认的provider(由routes或router标签上继承而来)
+          if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
+            route.setProvider(providerAttr.getValue());
+          } else {
+            route.setProvider(defaultProvider);
+          }
 
-        // 优先使用自身的content-type属性,不存在的话使用默认的content-type(由routes标签上继承而来)
-        if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
-          route.setContentType(util.extractContentType(contentTypeAttr.getValue()));
-        } else {
-          route.setContentType(defaultContentType);
-        }
+          // 优先使用自身的content-type属性,不存在的话使用默认的content-type(由routes标签上继承而来)
+          if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
+            route.setContentType(util.extractContentType(contentTypeAttr.getValue()));
+          } else {
+            route.setContentType(defaultContentType);
+          }
 
-        if (locationAttr != null && !locationAttr.getValue().isEmpty()) {
-          route.setLocation(util.replaceByMatcher(matcher, locationAttr.getValue()));
-        } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
-          route.setLocation(util.replaceByMatcher(matcher, targetAttr.getValue()));
-        }
+          if (locationAttr != null && !locationAttr.getValue().isEmpty()) {
+            route.setLocation(util.replaceByMatcher(matcher, locationAttr.getValue()));
+          } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
+            route.setLocation(util.replaceByMatcher(matcher, targetAttr.getValue()));
+          }
 
-        if (redirectAttr != null && !redirectAttr.getValue().isEmpty()) {
-          route.setRedirect(util.replaceByMatcher(matcher, redirectAttr.getValue()));
+          if (redirectAttr != null && !redirectAttr.getValue().isEmpty()) {
+            route.setRedirect(util.replaceByMatcher(matcher, redirectAttr.getValue()));
+          }
         }
       }
     }

@@ -335,12 +335,18 @@ public class util {
    * @return 去除了首尾斜杠"/"的路径
    */
   public static String trimSlash(String path){
-    if (path.startsWith("/")) {
-      path = path.substring(1, path.length());
+    int length = path.length();
+
+    if (length < 2) {
+      return path;
     }
 
-    if (path.endsWith("/")) {
-      path = path.substring(0, path.length() - 1);
+    if (path.startsWith("/")) {
+      path = path.substring(1, length);
+    }
+
+    if (length > 2 && path.endsWith("/")) {
+      path = path.substring(0, length - 1);
     }
 
     return path;
