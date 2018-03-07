@@ -292,6 +292,33 @@ public class util {
   }
 
   /**
+   * 将输入流转为字符串
+   * @param stream 输入流
+   * @return 解析后的的JSON Object
+   * @throws IOException
+   */
+  public static String stream2string(InputStream stream)
+    throws IOException {
+    if (stream == null) {
+      return null;
+    }
+
+    InputStreamReader inputReader = new InputStreamReader(stream, "UTF-8");
+    BufferedReader buffer = new BufferedReader(inputReader);
+    StringBuilder builder = new StringBuilder();
+    String line;
+    while ((line = buffer.readLine()) != null) {
+      builder.append(line);
+    }
+
+    buffer.close();
+    inputReader.close();
+    stream.close();
+
+    return builder.toString();
+  }
+
+  /**
    * 输入流转为byte[]
    * @param in
    * @return
