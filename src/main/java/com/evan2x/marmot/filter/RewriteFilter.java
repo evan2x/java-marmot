@@ -1,19 +1,13 @@
 
 package com.evan2x.marmot.filter;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -122,14 +116,12 @@ public class RewriteFilter implements Filter {
 
           // 其他情况一律直接返回远程数据
         } else {
-          String data = remoteData.getData();
+          byte[] data = remoteData.getData();
+          OutputStream out = response.getOutputStream();
 
-          if (data != null) {
-            PrintWriter writer = response.getWriter();
-            writer.write(data);
-            writer.flush();
-            writer.close();
-          }
+          out.write(data);
+          out.flush();
+          out.close();
 
           return true;
         }

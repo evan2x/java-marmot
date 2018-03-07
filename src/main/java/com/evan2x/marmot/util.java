@@ -5,10 +5,7 @@ import javax.lang.model.type.UnknownTypeException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -106,8 +103,9 @@ public class util {
     }
 
     RemoteData remoteData = new RemoteData();
+
     remoteData.setUrl(url);
-    remoteData.setData(stream2string(inputStream).trim());
+    remoteData.setData(streamToByte(inputStream));
 
     setResponseHeader(response, connection);
     response.setHeader("X-Target-Url", url);
@@ -294,34 +292,25 @@ public class util {
   }
 
   /**
-   * 将输入流转为字符串
-   * @param stream 输入流
-   * @return 解析后的的JSON Object
+   * 输入流转为byte[]
+   * @param in
+   * @return
    * @throws IOException
    */
-  public static String stream2string(InputStream stream)
-          throws IOException {
-    if (stream == null) {
-      return null;
+  public static byte[] streamToByte(InputStream in) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    byte[] buf = new byte[1024];
+    int len;
+
+    while ((len = in.read(buf)) != -1) {
+      out.write(buf, 0, len);
     }
 
-    InputStreamReader inputReader = new InputStreamReader(stream, "UTF-8");
-    BufferedReader buffer = new BufferedReader(inputReader);
-    StringBuilder builder = new StringBuilder();
-    String line;
-    while ((line = buffer.readLine()) != null) {
-      builder.append(line);
-    }
-
-    buffer.close();
-    inputReader.close();
-    stream.close();
-
-    return builder.toString();
+    return out.toByteArray();
   }
 
   /**
-   * 将多个斜杠"/"替换为一个
+   * 多个斜杠"/"替换为一个
    * @param path 待处理路径
    * @return 替换后的路径
    */

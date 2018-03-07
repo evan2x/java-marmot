@@ -1,8 +1,10 @@
 package com.evan2x.marmot.object;
 
+import java.io.InputStream;
+
 public class RemoteData {
   private String url;
-  private String data;
+  private byte[] data;
 
   public String getUrl() {
     return url;
@@ -12,11 +14,11 @@ public class RemoteData {
     this.url = url;
   }
 
-  public String getData() {
+  public byte[] getData() {
     return data;
   }
 
-  public void setData(String data) {
+  public void setData(byte[] data) {
     this.data = data;
   }
 }
