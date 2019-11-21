@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -22,7 +20,7 @@ import com.evan2x.marmot.object.RemoteData;
 
 public class util {
   /**
-   * 使用指定provider请求远程数据
+   * 使用指定proxy请求远程数据
    * @param hostPath 代理地址
    * @param cookies 附加的cookie
    * @param request 原request对象
@@ -32,24 +30,32 @@ public class util {
    */
   public static RemoteData requestRemoteData(String hostPath, List<Cookie> cookies, HttpServletRequest request, HttpServletResponse response)
           throws IOException {
-    String queryString = request.getQueryString();
-    String uri = request.getRequestURI();
-
-    if (queryString == null) {
-      queryString = "";
-    } else {
-      queryString = "?" + queryString;
-    }
+    String qs = request.getQueryString();
+    String pathname = request.getRequestURI();
+    String url;
 
     if (hostPath.matches("^(?i)http(?:s)?://[\\s\\S]*$")) {
-      hostPath = hostPath + uri + queryString;
+      url = normalizeUrl(hostPath, pathname, qs);
     } else {
       String scheme = request.getScheme() + "://";
       hostPath = hostPath.replaceAll("^(?i)(?:[a-z]+:/+)|(?:/*)", "");
-      hostPath = scheme + hostPath + uri + queryString;
+      url = normalizeUrl(scheme + hostPath, pathname, qs);
     }
 
-    return sendRequest(hostPath, cookies, request, response);
+    return sendRequest(url, cookies, request, response);
+  }
+
+  private static String normalizeUrl(String host, String pathname, String qs) {
+    host = util.trimEnd(host, '/');
+    pathname = util.trimStart(pathname, '/');
+
+    if (qs == null) {
+      qs = "";
+    } else {
+      qs = "?" + qs;
+    }
+
+    return host + "/" + pathname + qs;
   }
 
   /**
@@ -118,7 +124,7 @@ public class util {
    * 设置发起请求的headers
    * @param request 原request对象
    * @param connection 发起请求的connection
-   * @param cookies 向provider发起请求时, 携带上附加的cookie, 当本次请求中已存在一样的cookie name, 则不进行覆盖
+   * @param cookies 向proxy发起请求时, 携带上附加的cookie, 当本次请求中已存在一样的cookie name, 则不进行覆盖
    * @throws IOException
    */
   private static void setRequestHeader(HttpServletRequest request, HttpURLConnection connection, List<Cookie> cookies)
@@ -148,16 +154,16 @@ public class util {
     String cookieByHeader = request.getHeader("cookie");
     StringBuilder cookieBuilder = new StringBuilder();
 
-    if (cookieByHeader != null && !cookieByHeader.isEmpty()) {
+    if (isNotEmpty(cookieByHeader)) {
       cookieBuilder.append(cookieByHeader);
     } else {
       cookieByHeader = "";
     }
+
     if (cookies != null && !cookies.isEmpty()) {
       for (Cookie cookie : cookies) {
-
         String cookieName = cookie.getName();
-        if (cookieByHeader.isEmpty() || cookieByHeader.matches("[^\b]*\\b"+ cookieName +"=.+")) {
+        if (isEmpty(cookieByHeader) || cookieByHeader.matches("[^\b]*\\b"+ cookieName +"=.+")) {
           cookieBuilder.append(";").append(cookie.getName()).append("=").append(cookie.getValue());
         }
       }
@@ -176,7 +182,7 @@ public class util {
       builder.append(line);
     }
 
-    if (!builder.toString().isEmpty()) {
+    if (isNotEmpty(builder.toString())) {
       byte[] bytes = builder.toString().getBytes();
       connection.setDoOutput(true);
       connection.getOutputStream().write(bytes);
@@ -211,22 +217,6 @@ public class util {
         response.setHeader(key, list2string(list, ','));
       }
     }
-  }
-
-  /**
-   * 提取content-type中的类型部分, 忽略掉charset部分. 当输入的content-type是无效的类型时, 将返回text/plain
-   * @param contentType 原content-type字符串
-   * @return 经过处理的content-type
-   */
-  public static String extractContentType(String contentType) {
-    Matcher matcher = Pattern.compile("[a-zA-Z]+/[\\w+-.*]+").matcher(contentType);
-    matcher.find();
-    String result = matcher.group(0);
-    if (result != null && !result.isEmpty()) {
-      return result.toLowerCase();
-    }
-
-    return "text/plain";
   }
 
   /**
@@ -341,44 +331,113 @@ public class util {
    * @param path 待处理路径
    * @return 替换后的路径
    */
-  public static String uniqueBySerialSlash(String path){
+  public static String uniqueSerialSlash(String path){
     return path.replaceAll("(/)+\\1", "$1");
   }
 
   /**
-   * 去除路径中首尾的斜杠"/"
-   * @param path 待处理路径
-   * @return 去除了首尾斜杠"/"的路径
+   * 去除字符串头部中指定的字符列表
+   * @param str
+   * @param trimChars
+   * @return
    */
-  public static String trimSlash(String path){
-    int length = path.length();
+  public static String trimStart(String str, char[] trimChars) {
+    int index = 0;
 
-    if (length < 2) {
-      return path;
+    while (index < str.length()) {
+      boolean exists = false;
+
+      for (char trimChar : trimChars) {
+        if (str.charAt(index) == trimChar) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) {
+        break;
+      }
+
+      index++;
     }
 
-    if (path.startsWith("/")) {
-      path = path.substring(1, length);
-    }
-
-    if (length > 2 && path.endsWith("/")) {
-      path = path.substring(0, length - 1);
-    }
-
-    return path;
+    return str.substring(index, str.length());
   }
 
   /**
-   * 根据matcher匹配到的子分组，对字符串中的$1,$2,$3....替换为指定分组中的内容
-   * @param matcher 匹配组
-   * @param str 待处理字符串
-   * @return 经过替换的字符串
+   * 去除字符串头部中指定的字符
+   * @param str
+   * @param trimChar
+   * @return
    */
-  public static String replaceByMatcher(Matcher matcher, String str) {
-    for (int i = 1; i <= matcher.groupCount(); i++) {
-      str = str.replace("$" + i, matcher.group(i));
+  public static String trimStart(String str, char trimChar) {
+    char[] trimChars = { trimChar };
+    return trimStart(str, trimChars);
+  }
+
+  /**
+   * 去除字符串头部中指定的空白符
+   * @param str
+   * @return
+   */
+  public static String trimStart(String str) {
+    return trimStart(str, ' ');
+  }
+
+  /**
+   * 去除字符串尾部中指定的字符列表
+   * @param str
+   * @param trimChars
+   * @return
+   */
+  public static String trimEnd(String str, char[] trimChars) {
+    int index = str.length() - 1;
+
+    while (index > 0) {
+      boolean exists = false;
+
+      for (char trimChar : trimChars) {
+        if (str.charAt(index) == trimChar) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) {
+        break;
+      }
+
+      index--;
     }
 
-    return str;
+    return str.substring(0, index + 1);
+  }
+
+  /**
+   * 去除字符串尾部中指定的字符
+   * @param str
+   * @param trimChar
+   * @return
+   */
+  public static String trimEnd(String str, char trimChar) {
+    char[] trimChars = { trimChar };
+    return trimEnd(str, trimChars);
+  }
+
+  /**
+   * 去除字符串尾部中的空白符
+   * @param str
+   * @return
+   */
+  public static String trimEnd(String str) {
+    return trimEnd(str, ' ');
+  }
+
+  public static boolean isEmpty(String str) {
+    return str == null || str.length() == 0;
+  }
+
+  public static boolean isNotEmpty(String str) {
+    return !isEmpty(str);
   }
 }

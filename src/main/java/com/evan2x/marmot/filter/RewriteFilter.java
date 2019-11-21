@@ -26,7 +26,7 @@ public class RewriteFilter implements Filter {
   @Override
   public void init(FilterConfig config) throws ServletException {
     String routerFilePath = config.getInitParameter("routerFile");
-    if (routerFilePath != null && !routerFilePath.isEmpty()) {
+    if (util.isNotEmpty(routerFilePath)) {
       if (!routerFilePath.startsWith("/")) {
         routerFilePath = "/" + routerFilePath;
       }
@@ -73,7 +73,7 @@ public class RewriteFilter implements Filter {
     Router router = RouterParser.parse(request, this.routerEntry, scannedPaths, false);
     Route route = router.getRoute();
 
-    String provider = route.getProvider();
+    String proxy = route.getProxy();
     String location = route.getLocation();
     String redirect = route.getRedirect();
     String contentType = route.getContentType();
@@ -83,31 +83,31 @@ public class RewriteFilter implements Filter {
       List<Cookie> cookies = router.getCookies();
 
       // 请求重定向
-      if(redirect != null && !redirect.isEmpty()) {
+      if(util.isNotEmpty(redirect)) {
         response.sendRedirect(redirect);
         return true;
       }
 
-      if (contentType != null && !contentType.isEmpty()) {
+      if (util.isNotEmpty(contentType)) {
         response.setContentType(contentType);
       }
 
-      if (cookies != null) {
+      if (cookies != null && !cookies.isEmpty()) {
         for (Cookie cookie : cookies) {
           response.addCookie(cookie);
         }
       }
 
-      // provider属性存在时, 该路由会被转发到provider中指定的地址
-      if (provider != null && !provider.isEmpty()) {
-        RemoteData remoteData = util.requestRemoteData(provider, cookies, request, response);
+      // proxy属性存在时, 该路由会被转发到proxy中指定的地址
+      if (util.isNotEmpty(proxy)) {
+        RemoteData remoteData = util.requestRemoteData(proxy, cookies, request, response);
         List<String> contentTypes = new ArrayList<String>(){{
           add("text/html");
           add("text/htm");
         }};
 
         // 只有指定了路由的content-type为text/html或text/htm, 才会用远程数据渲染本地模板
-        if (contentType != null && !contentType.isEmpty() && contentTypes.contains(contentType.toLowerCase())) {
+        if (util.isNotEmpty(contentType) && contentTypes.contains(contentType.toLowerCase())) {
           request.setAttribute("location", location);
           request.setAttribute("url", remoteData.getUrl());
           request.setAttribute("data", remoteData.getData());
@@ -127,9 +127,9 @@ public class RewriteFilter implements Filter {
         }
 
         // 将请求直接转发到指定的location
-      } else if (location != null && !location.isEmpty()) {
+      } else if (util.isNotEmpty(location)) {
         request.setAttribute("location", location);
-        if (contentType != null && !contentType.isEmpty()) {
+        if (util.isNotEmpty(contentType)) {
           request.getRequestDispatcher(location).include(request, response);
         } else {
           request.getRequestDispatcher(location).forward(request, response);

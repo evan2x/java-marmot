@@ -25,13 +25,13 @@ import com.evan2x.marmot.util;
  */
 
 public class MockFilter implements Filter {
-  private String mockDataDirectory = "/mock";
+  private String mockDirectory = "/mock";
 
   @Override
   public void init(FilterConfig config) {
     String directory = config.getInitParameter("mockDir");
-    if (directory != null && !directory.isEmpty()) {
-      this.mockDataDirectory = directory;
+    if (util.isNotEmpty(directory)) {
+      this.mockDirectory = directory;
     }
   }
 
@@ -68,11 +68,11 @@ public class MockFilter implements Filter {
           throws IOException, ServletException {
     ServletContext context = request.getSession().getServletContext();
     String location = (String) request.getAttribute("location");
-    String data = (String) request.getAttribute("data");
+    String data = new String((byte[]) request.getAttribute("data"), "UTF-8");
     String targetUrl = (String) request.getAttribute("url");
 
-    // 绑定从provider取到的数据
-    if (data != null && !data.isEmpty()) {
+    // 绑定从proxy取到的数据
+    if (util.isNotEmpty(data)) {
       try {
         bindData(request, data);
         // 去除Content-Length, 使用Transfer-Encoding: chunked
@@ -83,7 +83,7 @@ public class MockFilter implements Filter {
 
       // 绑定本地数据, 目前只匹配json文件以及jsp文件
     } else {
-      String mockPath = getMockPath(location);
+      String mockPath = getLocalMockPath(location);
       String[] tryTypes = new String[]{
         mockPath + ".jsp",
         mockPath + ".json"
@@ -115,7 +115,7 @@ public class MockFilter implements Filter {
    * @param stringData 字符串数据
    */
   private void bindData(HttpServletRequest request, String stringData){
-    if (stringData != null && !stringData.isEmpty()) {
+    if (util.isNotEmpty(stringData)) {
       JSONObject data = JSON.parseObject(stringData);
       for (String key : data.keySet()) {
         request.setAttribute(key, data.get(key));
@@ -128,7 +128,7 @@ public class MockFilter implements Filter {
    * @param templatePath 模板路径
    * @return 本地mock数据路径
    */
-  private String getMockPath(String templatePath) {
+  private String getLocalMockPath(String templatePath) {
     int length = templatePath.length();
     int dotOffset = templatePath.lastIndexOf(".");
     String mockPath = templatePath.substring(0, length);
@@ -137,7 +137,7 @@ public class MockFilter implements Filter {
       mockPath = templatePath.substring(0, dotOffset);
     }
 
-    mockPath = util.uniqueBySerialSlash(this.mockDataDirectory + "/" + mockPath);
+    mockPath = util.uniqueSerialSlash(this.mockDirectory + "/" + mockPath);
 
     if (!mockPath.startsWith("/")) {
       mockPath = "/" + mockPath;

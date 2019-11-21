@@ -8,7 +8,10 @@ public interface RouterConstants {
 
   String LOCATION_ATTRIBUTE = "location";
 
+  /** @deprecated */
   String PROVIDER_ATTRIBUTE = "provider";
+
+  String PROXY_ATTRIBUTE = "proxy";
 
   String CONTENT_TYPE_ATTRIBUTE = "content-type";
 

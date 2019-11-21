@@ -4,7 +4,7 @@ public class Route {
   private String pathName;
   private String pathRule;
   private String location;
-  private String provider;
+  private String proxy;
   private String redirect;
   private String contentType;
 
@@ -32,12 +32,12 @@ public class Route {
     this.location = location;
   }
 
-  public String getProvider() {
-    return provider;
+  public String getProxy() {
+    return proxy;
   }
 
-  public void setProvider(String provider) {
-    this.provider = provider;
+  public void setProxy(String proxy) {
+    this.proxy = proxy;
   }
 
   public String getContentType() {

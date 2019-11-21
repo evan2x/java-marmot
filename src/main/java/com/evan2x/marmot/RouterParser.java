@@ -36,9 +36,7 @@ public class RouterParser {
           throws MalformedURLException, XMLStreamException {
     Router router = new Router();
     List<Cookie> cookies = new ArrayList<>();
-    Route route;
     ServletContext context = request.getSession().getServletContext();
-    String uri = util.uniqueBySerialSlash(request.getRequestURI());
 
     URL routerUrl = context.getResource(routerFilePath);
     if (routerUrl == null) {
@@ -50,8 +48,8 @@ public class RouterParser {
 
     boolean openRoutesTag = false;
     boolean openCookiesTag = false;
-    String defaultProvider = "";
-    String defaultContentType = "";
+    String extendsProxy = "";
+    String extendsContentType = "";
 
     XMLInputFactory factory = XMLInputFactory.newInstance();
     XMLEventReader reader = factory.createXMLEventReader(context.getResourceAsStream(routerFilePath));
@@ -64,28 +62,26 @@ public class RouterParser {
         String name = start.getName().toString();
 
         if (name.equals(RouterConstants.ROUTER_TAG)) {
-          Attribute defaultProviderAttr = start.getAttributeByName(new QName(RouterConstants.PROVIDER_ATTRIBUTE));
-          if (defaultProviderAttr != null && !defaultProviderAttr.getValue().isEmpty()) {
-            defaultProvider = defaultProviderAttr.getValue();
-          }
+          extendsProxy = getProxy(start);
           openRouterTag = true;
         }
 
         // 开启cookies匹配
-        if (name.equals(RouterConstants.COOKIES_TAG) && openRouterTag) {
+        if (openRouterTag && name.equals(RouterConstants.COOKIES_TAG)) {
           openCookiesTag = true;
         }
 
         // 转化cookie为bean
-        if (name.equals(RouterConstants.COOKIE_TAG) && openCookiesTag) {
+        if (openCookiesTag && name.equals(RouterConstants.COOKIE_TAG)) {
           cookies.add(convertCookie(start));
         }
 
         // import 标签匹配
-        if (name.equals(RouterConstants.IMPORT_TAG) && openRouterTag && scannedFilePaths.contains(scannedFilePath)) {
-          Attribute srcAttr = start.getAttributeByName(new QName(RouterConstants.SRC_ATTRIBUTE));
-          if (srcAttr != null && !srcAttr.getValue().isEmpty()) {
-            String importFilePath = routerFilePath.replaceAll("[^/]+\\.xml$", "") + srcAttr.getValue();
+        if (openRouterTag && name.equals(RouterConstants.IMPORT_TAG) && scannedFilePaths.contains(scannedFilePath)) {
+          String src = getAttribute(start, RouterConstants.SRC_ATTRIBUTE);
+
+          if (util.isNotEmpty(src)) {
+            String importFilePath = routerFilePath.replaceAll("[^/]+\\.xml$", "") + src;
             router = parse(request, importFilePath, scannedFilePaths, openRouterTag);
             if (router.isMatched()) {
               return router;
@@ -94,24 +90,18 @@ public class RouterParser {
         }
 
         // routes 标签匹配
-        if ((name.equals(RouterConstants.ROUTES_TAG) || name.equals(RouterConstants.ROUTE_MAP_TAG)) && openRouterTag) {
-          Attribute providerAttr = start.getAttributeByName(new QName(RouterConstants.PROVIDER_ATTRIBUTE));
-          if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
-            defaultProvider = providerAttr.getValue();
-          }
-
-          Attribute contentTypeAttr = start.getAttributeByName(new QName(RouterConstants.CONTENT_TYPE_ATTRIBUTE));
-          if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
-            defaultContentType = contentTypeAttr.getValue();
-          }
+        if (openRouterTag && (name.equals(RouterConstants.ROUTES_TAG) || name.equals(RouterConstants.ROUTE_MAP_TAG))) {
+          extendsProxy = getProxy(start);
+          extendsContentType = getAttribute(start, RouterConstants.CONTENT_TYPE_ATTRIBUTE);
           openRoutesTag = true;
         }
 
         // 转化route为bean
-        if (name.equals(RouterConstants.ROUTE_TAG) && openRoutesTag) {
-          route = convertRoute(uri, defaultProvider, defaultContentType, start);
+        if (openRoutesTag && name.equals(RouterConstants.ROUTE_TAG)) {
+          String uri = util.uniqueSerialSlash(request.getRequestURI());
+          Route route = convertRoute(uri, extendsProxy, extendsContentType, start);
           // 路由匹配成功跳出循环
-          if (route.getPathName() != null) {
+          if (util.isNotEmpty(route.getPathName())) {
             router.setRoute(route);
             router.setMatched(true);
             break;
@@ -150,119 +140,170 @@ public class RouterParser {
    * @param element 匹配到的路由节点
    * @return Cookie
    */
-  private static Cookie convertCookie (StartElement element) {
-    Cookie cookie = null;
+  private static Cookie convertCookie(StartElement element) {
+    String name = getAttribute(element, RouterConstants.COOKIE_NAME_ATTRIBUTE);
+    String value = getAttribute(element, RouterConstants.COOKIE_VALUE_ATTRIBUTE);
 
-    Attribute nameAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_NAME_ATTRIBUTE));
-    Attribute valueAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_VALUE_ATTRIBUTE));
+    if (util.isNotEmpty(name) && util.isNotEmpty(value)) {
+      Cookie cookie = new Cookie(name, value);
 
-    if (nameAttr != null && valueAttr != null && !nameAttr.getValue().isEmpty() && !valueAttr.getValue().isEmpty()) {
-      cookie = new Cookie(nameAttr.getValue(), valueAttr.getValue());
-
-      Attribute pathAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_PATH_ATTRIBUTE));
-      if (pathAttr != null && !pathAttr.getValue().isEmpty()) {
-        cookie.setPath(pathAttr.getValue());
+      String path = getAttribute(element, RouterConstants.COOKIE_PATH_ATTRIBUTE);
+      if (util.isNotEmpty(path)) {
+        cookie.setPath(path);
       }
 
-      Attribute domainAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_DOMAIN_ATTRIBUTE));
-      if (domainAttr != null && !domainAttr.getValue().isEmpty()) {
-        cookie.setDomain(domainAttr.getValue());
+      String domain = getAttribute(element, RouterConstants.COOKIE_DOMAIN_ATTRIBUTE);
+      if (util.isNotEmpty(domain)) {
+        cookie.setDomain(domain);
       }
 
-      Attribute maxAgeAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_MAX_AGE_ATTRIBUTE));
-      if (maxAgeAttr != null && !maxAgeAttr.getValue().isEmpty()) {
-        cookie.setMaxAge(Integer.parseInt(maxAgeAttr.getValue()));
+      String maxAge = getAttribute(element, RouterConstants.COOKIE_MAX_AGE_ATTRIBUTE);
+      if (util.isNotEmpty(maxAge)) {
+        cookie.setMaxAge(Integer.parseInt(maxAge));
       }
 
-      Attribute secureAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_SECURE_ATTRIBUTE));
-      if (secureAttr != null && !secureAttr.getValue().isEmpty()) {
-        cookie.setSecure(secureAttr.getValue().equals("true"));
+      String secure = getAttribute(element, RouterConstants.COOKIE_SECURE_ATTRIBUTE);
+      if (util.isNotEmpty(secure)) {
+        cookie.setSecure(secure.equals("true"));
       }
 
-      Attribute httpOnlyAttr = element.getAttributeByName(new QName(RouterConstants.COOKIE_HTTP_ONLY_ATTRIBUTE));
-      if (httpOnlyAttr != null && !httpOnlyAttr.getValue().isEmpty()) {
-        cookie.setHttpOnly(httpOnlyAttr.getValue().equals("true"));
+      String httpOnly = getAttribute(element, RouterConstants.COOKIE_HTTP_ONLY_ATTRIBUTE);
+      if (util.isNotEmpty(httpOnly)) {
+        cookie.setHttpOnly(httpOnly.equals("true"));
       }
+
+      return cookie;
     }
 
-    return cookie;
+    return null;
   }
 
   /**
-   * 将当前匹配到的结果转化为RouteBean
+   * 将当前匹配到的结果转化为Route对象
    * @param uri 当前请求的url路径
-   * @param defaultProvider 路由父级标签的provider
+   * @param defaultProxy 默认的proxy
+   * @param defaultContentType 默认的content-type
    * @param element 匹配到的路由节点
    * @return RouteBean
    */
-  private static Route convertRoute (String uri, String defaultProvider, String defaultContentType, StartElement element) {
+  private static Route convertRoute(String uri, String defaultProxy, String defaultContentType, StartElement element) {
     Route route = new Route();
 
-    Attribute ruleAttr = element.getAttributeByName(new QName(RouterConstants.RULE_ATTRIBUTE));
-    Attribute locationAttr = element.getAttributeByName(new QName(RouterConstants.LOCATION_ATTRIBUTE));
-    Attribute providerAttr = element.getAttributeByName(new QName(RouterConstants.PROVIDER_ATTRIBUTE));
-    Attribute redirectAttr = element.getAttributeByName(new QName(RouterConstants.REDIRECT_ATTRIBUTE));
-    Attribute contentTypeAttr = element.getAttributeByName(new QName(RouterConstants.CONTENT_TYPE_ATTRIBUTE));
+    String rule = getRule(element);
 
-    /** @deprecated */
-    Attribute uriAttr = element.getAttributeByName(new QName(RouterConstants.URI_ATTRIBUTE));
-    /** @deprecated */
-    Attribute targetAttr = element.getAttributeByName(new QName(RouterConstants.TARGET_ATTRIBUTE));
+    if (util.isNotEmpty(rule)) {
+      Pattern pattern = Pattern.compile(rule);
+      Matcher matcher = pattern.matcher(uri);
 
-    if (ruleAttr != null || uriAttr != null) {
+      // 匹配成功
+      if (matcher.find()) {
+        route.setPathRule(rule);
+        route.setPathName(uri);
 
-      String rule = "";
-      if (ruleAttr != null && !ruleAttr.getValue().isEmpty()) {
-        rule = util.trimSlash(ruleAttr.getValue());
-      } else if (uriAttr != null && !uriAttr.getValue().isEmpty()) {
-        rule = util.trimSlash(uriAttr.getValue());
+        String proxy = getProxy(element);
+        if (util.isEmpty(proxy)) {
+          proxy = defaultProxy;
+        }
+
+        if (util.isNotEmpty(proxy)) {
+          route.setProxy(proxy);
+        }
+
+        String contentType = getAttribute(element, RouterConstants.CONTENT_TYPE_ATTRIBUTE);
+        if (util.isEmpty(contentType)) {
+          contentType = defaultContentType;
+        }
+
+        if (util.isNotEmpty(contentType)) {
+          route.setContentType(contentType);
+        }
+
+        String location = getLocation(element);
+        if (util.isNotEmpty(location)) {
+          route.setLocation(location);
+        }
+
+        String redirect = getAttribute(element, RouterConstants.REDIRECT_ATTRIBUTE);
+        if (util.isNotEmpty(redirect)) {
+          route.setRedirect(redirect);
+        }
       }
+    }
+
+    return route;
+  }
+
+  /**
+   * 获取代理节点元素的属性值
+   * @param element 节点元素
+   * @return
+   */
+  private static String getProxy(StartElement element) {
+    String proxy = getAttribute(element, RouterConstants.PROXY_ATTRIBUTE);
+
+    if (util.isEmpty(proxy)) {
+      proxy = getAttribute(element, RouterConstants.PROVIDER_ATTRIBUTE);
+    }
+
+    return proxy;
+  }
+
+  /**
+   * 获取路由的匹配规则
+   * @param element 节点元素
+   * @return
+   */
+  private static String getRule(StartElement element) {
+    String rule = getAttribute(element, RouterConstants.RULE_ATTRIBUTE);
+
+    if (util.isEmpty(rule)) {
+      rule = getAttribute(element, RouterConstants.URI_ATTRIBUTE);
+    }
+
+    if (util.isNotEmpty(rule)) {
+      rule =  util.trimEnd(rule, '/');
 
       if (!rule.startsWith("^")) {
         rule = "^" + rule;
       }
 
       if (!rule.endsWith("$")) {
-        rule += "$";
-      }
-
-      uri = util.trimSlash(uri);
-      if (!rule.isEmpty() && !uri.isEmpty()) {
-        Pattern pattern = Pattern.compile(rule);
-        Matcher matcher = pattern.matcher(uri);
-
-        // 路由匹配成功
-        if (matcher.find()) {
-          route.setPathName(uri);
-          route.setPathRule(rule);
-
-          // 优先使用自身的provider属性,不存在的话使用默认的provider(由routes或router标签上继承而来)
-          if (providerAttr != null && !providerAttr.getValue().isEmpty()) {
-            route.setProvider(providerAttr.getValue());
-          } else {
-            route.setProvider(defaultProvider);
-          }
-
-          // 优先使用自身的content-type属性,不存在的话使用默认的content-type(由routes标签上继承而来)
-          if (contentTypeAttr != null && !contentTypeAttr.getValue().isEmpty()) {
-            route.setContentType(util.extractContentType(contentTypeAttr.getValue()));
-          } else {
-            route.setContentType(defaultContentType);
-          }
-
-          if (locationAttr != null && !locationAttr.getValue().isEmpty()) {
-            route.setLocation(util.replaceByMatcher(matcher, locationAttr.getValue()));
-          } else if(targetAttr != null && !targetAttr.getValue().isEmpty()) {
-            route.setLocation(util.replaceByMatcher(matcher, targetAttr.getValue()));
-          }
-
-          if (redirectAttr != null && !redirectAttr.getValue().isEmpty()) {
-            route.setRedirect(util.replaceByMatcher(matcher, redirectAttr.getValue()));
-          }
-        }
+        rule = rule + "$";
       }
     }
 
-    return route;
+    return rule;
+  }
+
+  /**
+   * 获取路由映射的资源地址
+   * @param element
+   * @return
+   */
+  private static String getLocation(StartElement element) {
+    String location = getAttribute(element, RouterConstants.LOCATION_ATTRIBUTE);
+
+    if (util.isEmpty(location)) {
+      location = getAttribute(element, RouterConstants.TARGET_ATTRIBUTE);
+    }
+
+    return location;
+  }
+
+  /**
+   * 获取指定节点元素的属性值
+   * @param element 节点元素
+   * @param attrName 属性名
+   * @return
+   */
+  private static String getAttribute(StartElement element, String attrName) {
+    String value = null;
+    Attribute attr = element.getAttributeByName(new QName(attrName));
+
+    if (attr != null) {
+      value = attr.getValue();
+    }
+
+    return value;
   }
 }

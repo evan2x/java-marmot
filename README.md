@@ -32,8 +32,8 @@ maven 依赖配置
 </dependency>
 ```
 
-让SpringMVC支持Marmot provider 视图的拦截器:
+让SpringMVC支持Marmot proxy 视图的拦截器:
 
 ```java
-com.evan2x.marmot.support.spring.ProviderViewInterceptor
+com.evan2x.marmot.support.spring.ProxyViewInterceptor
 ```
