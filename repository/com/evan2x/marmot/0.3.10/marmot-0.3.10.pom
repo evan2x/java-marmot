@@ -88,11 +88,4 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-      <repository>
-        <id>github</id>
-        <name>java-marmot</name>
-        <url>https://maven.pkg.github.com/evan2x/java-marmot</url>
-      </repository>
-    </distributionManagement>
 </project>
