@@ -28,7 +28,7 @@ maven 依赖配置
 <dependency>
     <groupId>com.evan2x</groupId>
     <artifactId>marmot</artifactId>
-    <version>0.3.9</version>
+    <version>0.3.10</version>
 </dependency>
 ```
 
