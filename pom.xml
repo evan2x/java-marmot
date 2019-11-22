@@ -5,7 +5,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <groupId>com.evan2x</groupId>
     <artifactId>marmot</artifactId>
     <packaging>jar</packaging>
-    <version>0.3.10</version>
+    <version>0.3.11</version>
     <name>Marmot</name>
     <properties>
         <jetty.version>9.2.15.v20160210</jetty.version>
