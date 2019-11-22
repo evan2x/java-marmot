@@ -111,7 +111,7 @@ public class util {
     RemoteData remoteData = new RemoteData();
 
     remoteData.setUrl(url);
-    remoteData.setData(streamToByte(inputStream));
+    remoteData.setData(stream2byte(inputStream));
 
     setResponseHeader(response, connection);
     response.setHeader("X-Target-Url", url);
@@ -314,7 +314,7 @@ public class util {
    * @return
    * @throws IOException
    */
-  public static byte[] streamToByte(InputStream in) throws IOException {
+  public static byte[] stream2byte(InputStream in) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     byte[] buf = new byte[1024];
     int len;
@@ -324,6 +324,21 @@ public class util {
     }
 
     return out.toByteArray();
+  }
+
+  /**
+   * 将byte[]转为json字符串
+   * @param bytes
+   * @return
+   */
+  public static String byte2string(byte[] bytes) {
+    String json = "";
+
+    if (bytes != null && bytes.length > 0) {
+      json = new String(bytes);
+    }
+
+    return json;
   }
 
   /**

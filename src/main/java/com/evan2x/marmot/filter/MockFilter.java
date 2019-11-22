@@ -68,7 +68,7 @@ public class MockFilter implements Filter {
           throws IOException, ServletException {
     ServletContext context = request.getSession().getServletContext();
     String location = (String) request.getAttribute("location");
-    String data = new String((byte[]) request.getAttribute("data"), "UTF-8");
+    String data = util.byte2string((byte[]) request.getAttribute("data"));
     String targetUrl = (String) request.getAttribute("url");
 
     // 绑定从proxy取到的数据
